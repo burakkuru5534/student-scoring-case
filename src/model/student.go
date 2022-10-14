@@ -22,7 +22,3 @@ func (s *Student) GetPoint() int64 {
 func (s *Student) SetGroupName(groupName string) {
 	s.GroupName = groupName
 }
-
-func (s *Student) AddPoint(point int64) {
-	s.Point += point
-}
