@@ -12,15 +12,16 @@ type Student struct {
 	Point     int64  `db:"point"`
 }
 
-func (s *Student) GivePointToStudent(number, point int64) {
+func (s *Student) GivePointToStudent(number, point int64) error {
 	s.Number = number
 	s.Point = point
 	sq := "update student set point = point + $1 where number = $2"
 	_, err := helper.App.DB.Exec(sq, s.Point, s.Number)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
+	return nil
 }
 
 // every beginnig of the day we will give points to students
@@ -69,4 +70,44 @@ func (s *Student) WeeklyProcess() {
 		panic(err)
 	}
 
+}
+
+func (s *Student) MakeChangeIfFirstStudentOfBMoreThanLastStudentOfA() error {
+	sq := "select point,number from student where group_name = 'B' order by point desc limit 1"
+	var studentB Student
+	err := helper.App.DB.Get(&studentB, sq)
+	if err != nil {
+		return err
+	}
+	sq = "select point,number from student where group_name = 'A' order by point asc limit 1"
+	var studentA Student
+	err = helper.App.DB.Get(&studentA, sq)
+	if err != nil {
+		return err
+	}
+
+	if studentB.Point > studentA.Point {
+		// we will change the first student of group B with the last student of group A
+		sq = "update student set group_name = 'A' where number = $1"
+		_, err = helper.App.DB.Exec(sq, studentB.Number)
+		if err != nil {
+			return err
+		}
+		sq = "update student set group_name = 'B' where number = $1"
+		_, err = helper.App.DB.Exec(sq, studentA.Number)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Student) ListStudents() []Student {
+	sq := "select * from student order by group_name,point desc,number asc"
+	var students []Student
+	err := helper.App.DB.Select(&students, sq)
+	if err != nil {
+		panic(err)
+	}
+	return students
 }

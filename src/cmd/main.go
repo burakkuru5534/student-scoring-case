@@ -38,9 +38,9 @@ func main() {
 		errors.New("init app error.")
 	}
 
-	ticker1hour := time.NewTicker(1 * time.Second)
-	ticker1day := time.NewTicker(24 * time.Second)
-	ticker7day := time.NewTicker(168 * time.Second)
+	ticker1hour := time.NewTicker(10 * time.Second)
+	ticker1day := time.NewTicker(240 * time.Second)
+	ticker7day := time.NewTicker(1680 * time.Second)
 	myMatrix := make([][]int64, 24)
 	for i := range myMatrix {
 		myMatrix[i] = make([]int64, 7)
@@ -53,20 +53,35 @@ func main() {
 			case <-done:
 				return
 			case _ = <-ticker1hour.C:
-				fmt.Println("HourCounter: ", helper.Conf.HourCounter)
+				//	fmt.Println("HourCounter: ", helper.Conf.HourCounter)
 				myMatrix[helper.Conf.HourCounter][helper.Conf.DayCounter] = 1
-				fmt.Println(fmt.Sprintf("myMatrix[%d][%d]: %d", helper.Conf.HourCounter, helper.Conf.DayCounter, myMatrix[helper.Conf.HourCounter][helper.Conf.DayCounter]))
+				//fmt.Println(fmt.Sprintf("myMatrix[%d][%d]: %d", helper.Conf.HourCounter, helper.Conf.DayCounter, myMatrix[helper.Conf.HourCounter][helper.Conf.DayCounter]))
 				helper.Conf.HourCounter += 1
 
 			case _ = <-ticker1day.C:
 				for i := range myMatrix {
-					if myMatrix[i][helper.Conf.DayCounter] == 1 {
+					if myMatrix[i][0] == 1 {
 						//give point to student
 						fmt.Println("give point to student for hour: ", i)
+						students := model.GetGroupAStudentList()
+						for i, student := range students {
+
+							if i < 4 {
+								student.GivePointToStudent(student.Number, 1)
+							} else if i < 8 {
+								student.GivePointToStudent(student.Number, 2)
+							} else if i < 10 {
+								student.GivePointToStudent(student.Number, 3)
+							}
+						}
 					}
 				}
 				helper.Conf.HourCounter = 0
 				helper.Conf.DayCounter += 1
+				myMatrix = make([][]int64, 24)
+				for i := range myMatrix {
+					myMatrix[i] = make([]int64, 7)
+				}
 				fmt.Println("DayCounter: ", helper.Conf.DayCounter)
 				fmt.Println("HourCounter: ", helper.Conf.HourCounter)
 
@@ -140,12 +155,22 @@ func main() {
 				panic(err)
 			}
 			student := model.Student{}
-			student.GivePointToStudent(studentNumber, point)
+			err = student.GivePointToStudent(studentNumber, point)
+			if err != nil {
+				fmt.Println("Error: ", err)
+			}
+			err = student.MakeChangeIfFirstStudentOfBMoreThanLastStudentOfA()
+			if err != nil {
+				fmt.Println("Error: ", err)
+			}
 
 		case 3:
 			fmt.Println("List students")
-			//student := model.Student{}
-			//student.ListStudents()
+			student := model.Student{}
+			students := student.ListStudents()
+			for _, student := range students {
+				fmt.Println(student)
+			}
 		case 4:
 			fmt.Println("End of the week")
 			helper.Conf.HourCounter = 0
