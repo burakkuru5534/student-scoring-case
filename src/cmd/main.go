@@ -53,13 +53,10 @@ func main() {
 			case _ = <-ticker1hour.C:
 
 				myMatrix[helper.TimeStruct.HourCounter][helper.TimeStruct.DayCounter] = 1
-				fmt.Println("hour: ", helper.TimeStruct.HourCounter, " day: ", helper.TimeStruct.DayCounter, " week: ", helper.TimeStruct.WeekCounter)
 				if myMatrix[helper.TimeStruct.HourCounter][helper.TimeStruct.DayCounter] == 1 {
-
 					students := model.GetGroupAStudentList()
 					for i, student := range students {
-						var condition bool
-						switch condition {
+						switch true {
 
 						case i < 4:
 							err = student.GivePointToStudent(student.Number, 1)
@@ -92,6 +89,7 @@ func main() {
 					}
 					myMatrix = make([][]int64, 24)
 					for i := range myMatrix {
+						//	fmt.Println("hour: ", helper.TimeStruct.HourCounter, " day: ", helper.TimeStruct.DayCounter, " week: ", helper.TimeStruct.WeekCounter)
 						myMatrix[i] = make([]int64, 7)
 					}
 				}
