@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"github.com/burakkuru5534/src/helper"
 )
 
@@ -34,21 +33,6 @@ func (s *Student) GivePointToStudent(number, point int64) error {
 // next 4 students of group A will have 2 points
 // last 4 students of group A will have 1 point
 
-func DailyProcess() {
-	students := GetGroupAStudentList()
-	for i, student := range students {
-
-		if i < 4 {
-			student.GivePointToStudent(student.Number, 1)
-		} else if i < 8 {
-			student.GivePointToStudent(student.Number, 2)
-		} else if i < 10 {
-			student.GivePointToStudent(student.Number, 3)
-		}
-	}
-	helper.Conf.DayCount++
-	fmt.Println("Day count:", helper.Conf.DayCount)
-}
 func GetGroupAStudentList() []Student {
 
 	sq := "select * from student where group_name = 'A' order by point,number asc"

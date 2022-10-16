@@ -60,6 +60,21 @@ create table if not exists student
 
 );
 
+insert into student (group_name, number, point) values ('A', 101, 0);
+insert into student (group_name, number, point) values ('A', 102, 0);
+insert into student (group_name, number, point) values ('A', 103, 0);
+insert into student (group_name, number, point) values ('A', 104, 0);
+insert into student (group_name, number, point) values ('A', 105, 0);
+insert into student (group_name, number, point) values ('A', 106, 0);
+insert into student (group_name, number, point) values ('A', 107, 0);
+insert into student (group_name, number, point) values ('A', 108, 0);
+insert into student (group_name, number, point) values ('A', 109, 0);
+insert into student (group_name, number, point) values ('A', 110, 0);
+insert into student (group_name, number, point) values ('B', 111, 0);
+insert into student (group_name, number, point) values ('B', 112, 0);
+insert into student (group_name, number, point) values ('B', 113, 0);
+insert into student (group_name, number, point) values ('B', 114, 0);
+insert into student (group_name, number, point) values ('B', 115, 0);
 --
 -- PostgreSQL database dump complete
 --

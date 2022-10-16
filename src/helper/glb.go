@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var App *app
@@ -46,4 +47,18 @@ func StrToInt64(aval string) int64 {
 		return 0
 	}
 	return i
+}
+
+func NewTicker(delay, repeat time.Duration) *time.Ticker {
+	ticker := time.NewTicker(repeat)
+	oc := ticker.C
+	nc := make(chan time.Time, 1)
+	go func() {
+		nc <- time.Now()
+		for tm := range oc {
+			nc <- tm
+		}
+	}()
+	ticker.C = nc
+	return ticker
 }

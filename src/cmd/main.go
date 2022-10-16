@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"github.com/burakkuru5534/src/helper"
 	"github.com/burakkuru5534/src/model"
-	"time"
-
 	_ "github.com/lib/pq"
 )
 
 func main() {
 
 	helper.InitConf()
+	helper.InıtTimeStruct()
 
 	conInfo := helper.PgConnectionInfo{
 		Host:     helper.Conf.Host,
@@ -38,13 +37,12 @@ func main() {
 		errors.New("init app error.")
 	}
 
-	ticker1hour := time.NewTicker(helper.Conf.HourSecond) // 10 second
-	ticker1day := time.NewTicker(helper.Conf.DaySecond)   // 240 second
-	ticker7day := time.NewTicker(helper.Conf.WeekSecond)  // 1680 second
 	myMatrix := make([][]int64, 24)
 	for i := range myMatrix {
 		myMatrix[i] = make([]int64, 7)
 	}
+
+	ticker1hour := helper.NewTicker(0, helper.Conf.HourSecond) // 10 second
 	done := make(chan bool)
 
 	go func() {
@@ -54,60 +52,48 @@ func main() {
 				return
 			case _ = <-ticker1hour.C:
 
-				myMatrix[helper.Conf.HourCounter][helper.Conf.DayCounter] = 1
-
-				if myMatrix[helper.Conf.HourCounter][helper.Conf.DayCounter] == 1 {
+				myMatrix[helper.TimeStruct.HourCounter][helper.TimeStruct.DayCounter] = 1
+				fmt.Println("hour: ", helper.TimeStruct.HourCounter, " day: ", helper.TimeStruct.DayCounter, " week: ", helper.TimeStruct.WeekCounter)
+				if myMatrix[helper.TimeStruct.HourCounter][helper.TimeStruct.DayCounter] == 1 {
 
 					students := model.GetGroupAStudentList()
 					for i, student := range students {
+						var condition bool
+						switch condition {
 
-						if i < 4 {
+						case i < 4:
 							err = student.GivePointToStudent(student.Number, 1)
 							if err != nil {
+								errors.New("give point error.")
 							}
-						} else if i < 8 {
+						case i < 8:
 							err = student.GivePointToStudent(student.Number, 2)
 							if err != nil {
+								errors.New("give point error.")
 							}
-						} else if i < 10 {
+						case i < 10:
 							err = student.GivePointToStudent(student.Number, 3)
 							if err != nil {
+								errors.New("give point error.")
 							}
 						}
 					}
 				}
-				helper.Conf.HourCounter += 1
-				if helper.Conf.HourCounter == 23 {
-					helper.Conf.HourCounter = 0
-					helper.Conf.DayCounter += 1
-					if helper.Conf.DayCounter == 6 {
-						helper.Conf.HourCounter = 0
-						helper.Conf.DayCounter = 0
-						helper.Conf.WeekCounter += 1
+				helper.TimeStruct.HourCounter += 1
+				if helper.TimeStruct.HourCounter > 23 {
+					helper.TimeStruct.HourCounter = 0
+					helper.TimeStruct.DayCounter += 1
+
+					if helper.TimeStruct.DayCounter > 6 {
+						helper.TimeStruct.HourCounter = 0
+						helper.TimeStruct.DayCounter = 0
+						helper.TimeStruct.WeekCounter += 1
+
 					}
-				}
-
-			case _ = <-ticker1day.C:
-
-				helper.Conf.HourCounter = 0
-				helper.Conf.DayCounter += 1
-				if helper.Conf.DayCounter == 6 {
-					helper.Conf.HourCounter = 0
-					helper.Conf.DayCounter = 0
-					helper.Conf.WeekCounter += 1
-				}
-				myMatrix = make([][]int64, 24)
-				for i := range myMatrix {
-					myMatrix[i] = make([]int64, 7)
-				}
-
-			case _ = <-ticker7day.C:
-				helper.Conf.HourCounter = 0
-				helper.Conf.DayCounter = 0
-				helper.Conf.WeekCounter += 1
-				myMatrix = make([][]int64, 24)
-				for i := range myMatrix {
-					myMatrix[i] = make([]int64, 7)
+					myMatrix = make([][]int64, 24)
+					for i := range myMatrix {
+						myMatrix[i] = make([]int64, 7)
+					}
 				}
 
 			}
@@ -132,11 +118,11 @@ func main() {
 		switch choice {
 		case 1:
 
-			helper.Conf.HourCounter = 0
-			helper.Conf.DayCounter += 1
-			if helper.Conf.DayCounter == 7 {
-				helper.Conf.DayCounter = 0
-				helper.Conf.WeekCounter += 1
+			helper.TimeStruct.HourCounter = 0
+			helper.TimeStruct.DayCounter += 1
+			if helper.TimeStruct.DayCounter > 6 {
+				helper.TimeStruct.DayCounter = 0
+				helper.TimeStruct.WeekCounter += 1
 				myMatrix = make([][]int64, 24)
 				for i := range myMatrix {
 					myMatrix[i] = make([]int64, 7)
@@ -181,9 +167,9 @@ func main() {
 				fmt.Println(student)
 			}
 		case 4:
-			helper.Conf.HourCounter = 0
-			helper.Conf.DayCounter = 0
-			helper.Conf.WeekCounter += 1
+			helper.TimeStruct.HourCounter = 0
+			helper.TimeStruct.DayCounter = 0
+			helper.TimeStruct.WeekCounter += 1
 
 			student := model.Student{}
 			err = student.ClearPoints()
