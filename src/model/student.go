@@ -111,3 +111,12 @@ func (s *Student) ListStudents() []Student {
 	}
 	return students
 }
+
+func (s *Student) ClearPoints() error {
+	sq := "update student set point = 0"
+	_, err := helper.App.DB.Exec(sq)
+	if err != nil {
+		return err
+	}
+	return nil
+}

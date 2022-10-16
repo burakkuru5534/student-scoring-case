@@ -38,9 +38,9 @@ func main() {
 		errors.New("init app error.")
 	}
 
-	ticker1hour := time.NewTicker(10 * time.Second)
-	ticker1day := time.NewTicker(240 * time.Second)
-	ticker7day := time.NewTicker(1680 * time.Second)
+	ticker1hour := time.NewTicker(helper.Conf.HourSecond) // 10 second
+	ticker1day := time.NewTicker(helper.Conf.DaySecond)   // 240 second
+	ticker7day := time.NewTicker(helper.Conf.WeekSecond)  // 1680 second
 	myMatrix := make([][]int64, 24)
 	for i := range myMatrix {
 		myMatrix[i] = make([]int64, 7)
@@ -53,37 +53,53 @@ func main() {
 			case <-done:
 				return
 			case _ = <-ticker1hour.C:
-				//	fmt.Println("HourCounter: ", helper.Conf.HourCounter)
+
 				myMatrix[helper.Conf.HourCounter][helper.Conf.DayCounter] = 1
-				//fmt.Println(fmt.Sprintf("myMatrix[%d][%d]: %d", helper.Conf.HourCounter, helper.Conf.DayCounter, myMatrix[helper.Conf.HourCounter][helper.Conf.DayCounter]))
-				helper.Conf.HourCounter += 1
 
-			case _ = <-ticker1day.C:
-				for i := range myMatrix {
-					if myMatrix[i][0] == 1 {
-						//give point to student
-						fmt.Println("give point to student for hour: ", i)
-						students := model.GetGroupAStudentList()
-						for i, student := range students {
+				if myMatrix[helper.Conf.HourCounter][helper.Conf.DayCounter] == 1 {
 
-							if i < 4 {
-								student.GivePointToStudent(student.Number, 1)
-							} else if i < 8 {
-								student.GivePointToStudent(student.Number, 2)
-							} else if i < 10 {
-								student.GivePointToStudent(student.Number, 3)
+					students := model.GetGroupAStudentList()
+					for i, student := range students {
+
+						if i < 4 {
+							err = student.GivePointToStudent(student.Number, 1)
+							if err != nil {
+							}
+						} else if i < 8 {
+							err = student.GivePointToStudent(student.Number, 2)
+							if err != nil {
+							}
+						} else if i < 10 {
+							err = student.GivePointToStudent(student.Number, 3)
+							if err != nil {
 							}
 						}
 					}
 				}
+				helper.Conf.HourCounter += 1
+				if helper.Conf.HourCounter == 23 {
+					helper.Conf.HourCounter = 0
+					helper.Conf.DayCounter += 1
+					if helper.Conf.DayCounter == 6 {
+						helper.Conf.HourCounter = 0
+						helper.Conf.DayCounter = 0
+						helper.Conf.WeekCounter += 1
+					}
+				}
+
+			case _ = <-ticker1day.C:
+
 				helper.Conf.HourCounter = 0
 				helper.Conf.DayCounter += 1
+				if helper.Conf.DayCounter == 6 {
+					helper.Conf.HourCounter = 0
+					helper.Conf.DayCounter = 0
+					helper.Conf.WeekCounter += 1
+				}
 				myMatrix = make([][]int64, 24)
 				for i := range myMatrix {
 					myMatrix[i] = make([]int64, 7)
 				}
-				fmt.Println("DayCounter: ", helper.Conf.DayCounter)
-				fmt.Println("HourCounter: ", helper.Conf.HourCounter)
 
 			case _ = <-ticker7day.C:
 				helper.Conf.HourCounter = 0
@@ -93,22 +109,10 @@ func main() {
 				for i := range myMatrix {
 					myMatrix[i] = make([]int64, 7)
 				}
-				fmt.Println("WeekCounter: ", helper.Conf.WeekCounter)
-				fmt.Println("hourCounter: ", helper.Conf.HourCounter)
-				fmt.Println("dayCounter: ", helper.Conf.DayCounter)
+
 			}
 		}
 	}()
-
-	//// Tickers can be stopped like timers. Once a ticker
-	//// is stopped it won't receive any more values on its
-	//// channel. We'll stop ours after 1600ms.
-	//time.Sleep(1000600 * time.Millisecond)
-	//ticker1hour.Stop()
-	//ticker7day.Stop()
-	//done <- true
-	//fmt.Println("Ticker stopped")
-	//
 
 	var choice int
 	for isExit := false; !isExit; {
@@ -127,7 +131,7 @@ func main() {
 		}
 		switch choice {
 		case 1:
-			fmt.Println("End of the day")
+
 			helper.Conf.HourCounter = 0
 			helper.Conf.DayCounter += 1
 			if helper.Conf.DayCounter == 7 {
@@ -154,6 +158,11 @@ func main() {
 				fmt.Println("Please enter a valid number")
 				panic(err)
 			}
+
+			if point > 5 || point < -5 {
+				fmt.Println("Please enter a valid number")
+				continue
+			}
 			student := model.Student{}
 			err = student.GivePointToStudent(studentNumber, point)
 			if err != nil {
@@ -172,10 +181,20 @@ func main() {
 				fmt.Println(student)
 			}
 		case 4:
-			fmt.Println("End of the week")
 			helper.Conf.HourCounter = 0
 			helper.Conf.DayCounter = 0
 			helper.Conf.WeekCounter += 1
+
+			student := model.Student{}
+			err = student.ClearPoints()
+			if err != nil {
+				fmt.Println("Error: ", err)
+			}
+			myMatrix = make([][]int64, 24)
+			for i := range myMatrix {
+				myMatrix[i] = make([]int64, 7)
+			}
+
 		case 5:
 			fmt.Println("Exit")
 			isExit = true

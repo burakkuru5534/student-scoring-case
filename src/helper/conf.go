@@ -1,5 +1,7 @@
 package helper
 
+import "time"
+
 type conf struct {
 	DayCount    int64
 	Host        string
@@ -11,6 +13,10 @@ type conf struct {
 	HourCounter int64
 	DayCounter  int64
 	WeekCounter int64
+
+	HourSecond time.Duration
+	DaySecond  time.Duration
+	WeekSecond time.Duration
 }
 
 var Conf *conf
@@ -27,5 +33,8 @@ func InitConf() {
 		HourCounter: 0,
 		DayCounter:  0,
 		WeekCounter: 0,
+		HourSecond:  10 * time.Second,
+		DaySecond:   240 * time.Second,
+		WeekSecond:  1680 * time.Second,
 	}
 }
