@@ -14,6 +14,7 @@ type conf struct {
 }
 
 var Conf *conf
+var ConInfo *PgConnectionInfo
 
 func InitConf() {
 	Conf = &conf{
@@ -24,6 +25,14 @@ func InitConf() {
 		Password:   "tayitkan",
 		SSLMode:    "disable",
 		HourSecond: 10 * time.Second,
+	}
+	ConInfo = &PgConnectionInfo{
+		Host:     Conf.Host,
+		Port:     Conf.Port,
+		Database: Conf.Database,
+		Username: Conf.Username,
+		Password: Conf.Password,
+		SSLMode:  Conf.SSLMode,
 	}
 }
 
