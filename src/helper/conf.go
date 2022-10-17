@@ -44,7 +44,7 @@ type timeStruct struct {
 
 var TimeStruct *timeStruct
 
-func InıtTimeStruct() {
+func InitTimeStruct() {
 	TimeStruct = &timeStruct{
 		HourCounter: 0,
 		DayCounter:  0,

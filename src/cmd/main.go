@@ -11,7 +11,7 @@ import (
 func main() {
 
 	helper.InitConf()
-	helper.InıtTimeStruct()
+	helper.InitTimeStruct()
 
 	db, err := helper.NewPgSqlxDbHandle(*helper.ConInfo, 10)
 	if err != nil {
@@ -27,6 +27,16 @@ func main() {
 	if err != nil {
 		errors.New("init app error.")
 	}
+
+	//student operations
+	err = mainProcess()
+	if err != nil {
+		errors.New("main process error.")
+	}
+
+}
+
+func mainProcess() error {
 
 	// we will give points to students with this matrix
 	myMatrix := make([][]int64, 24)
@@ -54,26 +64,27 @@ func main() {
 				if myMatrix[helper.TimeStruct.HourCounter][helper.TimeStruct.DayCounter] == 1 {
 
 					// get all group A students from db. bc we'll give points to only group A students
-					students := model.GetGroupAStudentList()
+					students := model.GetStudentsOfGroupA()
 					for i, student := range students {
 						switch true {
 
 						case i < 4:
 							//we get students from db with order by point and number asc
 							//so first 4 students will have 1 points
-							err = student.GivePointToStudent(student.Number, 1)
+							err := student.GivePointToStudent(student.Number, 1)
 							if err != nil {
 								errors.New("give point error.")
+
 							}
 						case i < 8:
 							//next 4 students will have 2 points
-							err = student.GivePointToStudent(student.Number, 2)
+							err := student.GivePointToStudent(student.Number, 2)
 							if err != nil {
 								errors.New("give point error.")
 							}
 						case i < 10:
 							//last 2 students will have 3 points
-							err = student.GivePointToStudent(student.Number, 3)
+							err := student.GivePointToStudent(student.Number, 3)
 							if err != nil {
 								errors.New("give point error.")
 							}
@@ -116,10 +127,9 @@ func main() {
 		fmt.Print("Enter your choice:")
 
 		// Taking input from user
-		_, err = fmt.Scanln(&choice)
+		_, err := fmt.Scanln(&choice)
 		if err != nil {
 			fmt.Println("Please enter a valid number")
-			panic(err)
 		}
 
 		switch choice {
@@ -141,6 +151,7 @@ func main() {
 				err = student.ClearPoints()
 				if err != nil {
 					fmt.Println("Error: ", err)
+					return err
 				}
 
 				//initialize the matrix
@@ -158,14 +169,14 @@ func main() {
 			_, err = fmt.Scanln(&studentNumber)
 			if err != nil {
 				fmt.Println("Please enter a valid number")
-				panic(err)
+				return err
 			}
 
 			fmt.Print("Enter point:")
 			_, err = fmt.Scanln(&point)
 			if err != nil {
 				fmt.Println("Please enter a valid number")
-				panic(err)
+				return err
 			}
 
 			//rule for give point to student: can't be greater than 5 and can't be less than -5
@@ -177,6 +188,7 @@ func main() {
 			err = student.GivePointToStudent(studentNumber, point)
 			if err != nil {
 				fmt.Println("Error: ", err)
+				return err
 			}
 
 			//after giving point we need to check if first student of b much more than last student of a
@@ -184,6 +196,7 @@ func main() {
 			err = student.MakeChangeIfFirstStudentOfBMoreThanLastStudentOfA()
 			if err != nil {
 				fmt.Println("Error: ", err)
+				return err
 			}
 
 		case 3:
@@ -205,6 +218,7 @@ func main() {
 			err = student.ClearPoints()
 			if err != nil {
 				fmt.Println("Error: ", err)
+				return err
 			}
 			//initialize the matrix
 			myMatrix = make([][]int64, 24)
@@ -220,4 +234,5 @@ func main() {
 
 	}
 
+	return nil
 }
