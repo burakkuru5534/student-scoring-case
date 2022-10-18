@@ -64,7 +64,7 @@ func (s *Student) MakeChangeIfFirstStudentOfBMoreThanLastStudentOfA() error {
 }
 
 func (s *Student) ListStudents() []Student {
-	sq := "select * from student order by group_name,point desc,number desc"
+	sq := "select * from student order by group_name,point desc,number asc"
 	var students []Student
 	err := helper.App.DB.Select(&students, sq)
 	if err != nil {
@@ -82,13 +82,33 @@ func (s *Student) ClearPoints() error {
 	return nil
 }
 
-func GetStudentsOfGroupA() []Student {
+func (s *Student) GetPointOfStudentByNumber(number int64) (int64, error) {
+	sq := "select point from student where number = $1"
+	var point int64
+	err := helper.App.DB.Get(&point, sq, number)
+	if err != nil {
+		return 0, err
+	}
+	return point, nil
+}
 
-	sq := "select * from student where group_name = 'A' order by point,number asc"
+func (s *Student) GetStudentsOfGroupA() ([]Student, error) {
+
+	sq := "select * from student where group_name = 'A' order by point desc,number asc"
 	var students []Student
 	err := helper.App.DB.Select(&students, sq)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return students
+	return students, nil
+}
+
+func (s *Student) GetGroupOfStudentByNumber(number int64) (string, error) {
+	sq := "select group_name from student where number = $1"
+	var group string
+	err := helper.App.DB.Get(&group, sq, number)
+	if err != nil {
+		return "", err
+	}
+	return group, nil
 }

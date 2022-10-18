@@ -62,3 +62,26 @@ func NewTicker(delay, repeat time.Duration) *time.Ticker {
 	ticker.C = nc
 	return ticker
 }
+
+func InitDb() error {
+	InitConf()
+	db, err := NewPgSqlxDbHandle(*ConInfo, 10)
+	if err != nil {
+		errors.New("create db handle error.")
+		return err
+	}
+	err = db.Ping()
+	if err != nil {
+		errors.New("ping db error.")
+		return err
+	}
+
+	// Create Appplication Service
+	err = InitApp(db)
+	if err != nil {
+		errors.New("init app error.")
+		return err
+	}
+
+	return nil
+}

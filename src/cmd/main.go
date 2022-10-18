@@ -64,19 +64,20 @@ func mainProcess() error {
 				if myMatrix[helper.TimeStruct.HourCounter][helper.TimeStruct.DayCounter] == 1 {
 
 					// get all group A students from db. bc we'll give points to only group A students
-					students := model.GetStudentsOfGroupA()
+					var student model.Student
+					students, _ := student.GetStudentsOfGroupA()
 					for i, student := range students {
 						switch true {
 
-						case i < 4:
+						case i < 2:
 							//we get students from db with order by point and number asc
 							//so first 4 students will have 1 points
-							err := student.GivePointToStudent(student.Number, 1)
+							err := student.GivePointToStudent(student.Number, 3)
 							if err != nil {
 								errors.New("give point error.")
 
 							}
-						case i < 8:
+						case i < 6:
 							//next 4 students will have 2 points
 							err := student.GivePointToStudent(student.Number, 2)
 							if err != nil {
@@ -84,7 +85,7 @@ func mainProcess() error {
 							}
 						case i < 10:
 							//last 2 students will have 3 points
-							err := student.GivePointToStudent(student.Number, 3)
+							err := student.GivePointToStudent(student.Number, 1)
 							if err != nil {
 								errors.New("give point error.")
 							}
